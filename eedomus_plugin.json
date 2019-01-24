@@ -1,0 +1,107 @@
+{    
+   "plugin_id": "pluviozrain",                     
+   "name_fr": "Pluviometrie ZRain", 
+   "name_en": "",           
+   "icon": "zrainappli.png",                      
+   "version": "1.0",                             
+   "creation_date": "2019-01-10",                
+   "modification_date": "2019-01-10",            
+
+   "author": "Germam",                
+   "description_fr": "Calcul des cumuls de pluie journaliers et mensuels pour capteur ZRain Popp",  
+   "description_en": "Compute days and monthes rain falls volumes for ZRain Popp sensor device" ,
+   "parameters": 
+   [        
+     {                    
+        "parameter": "id_cumul_zrain",                               
+        "description": "Id du cumul annuel du périphérique ZRain",  
+        "xtype": "combo",                           
+        "field": "store : getCombo('/json/list_all.php'), displayField: 'label', valueField: 'id',forceSelection: true, triggerAction: 'all',selectOnFocus: true, editable: false, shadow : true, mode: 'local', width: 250, listWidth: 300, allowBlank: false"                      
+     }    
+ ], 
+
+   "scripts": 
+   [        
+     {            
+        "name": "zrain.php"        
+     }    
+   ], 
+
+   "devices": 
+   [       
+      {
+         "device_id": "id_controle_pluie",
+         "module_id": "41",
+         "type": "http",
+         "name_fr": "Controle MAJ",
+         "icon": "zrain.png",
+         "utilisation_id": "43",
+         "create" : "1",
+         "parameters":
+            {
+               "VAR1": "id_cumul_zrain",
+               "VAR2": "id_cumul_mois",
+               "VAR3": "id_cumul_jour",
+               "value_type": "float",
+               "ignore_errors": 3,
+               "RAW_URL": "http://localhost/script/?exec=&api_cumul_zrain=[VAR1]&id_cumul_mois=[VAR2]&id_cumul_jour=[VAR3]&action=updateconso",
+               "RAW_XPATH": "",
+               "POLLING": "0"
+            },
+         "values":
+         [
+            { "value": "0", "description": "MAJ", "icon": "pilotage_c1.png", "http_url": "http://localhost/script/?exec=&api_cumul_zrain=[VAR1]&id_cumul_mois=[VAR2]&id_cumul_jour=[VAR3]&action=updateconso" },
+            { "value": "1", "description": "RAZ", "icon": "pilotage_c2.png", "http_url": "http://localhost/script/?exec=&api_cumul_zrain=[VAR1]&id_cumul_mois=[VAR2]&id_cumul_jour=[VAR3]&action=raz" }
+         ]
+      },
+      {
+         "device_id": "id_cumul_mois",
+         "module_id": "11",
+         "parent_id": "id_controle_pluie",
+         "type": "http",
+         "name_fr": "Cumul pluie mois",
+         "icon": "zrain.png",
+         "utilisation_id": "35",
+         "create" : "1",
+         "parameters":
+            {
+               "value_type": "float",
+               "value_unit": "mm",
+               "default_value" : "0"
+            }
+      },
+      {
+         "device_id": "id_controle_jour",
+         "module_id": "11",
+         "parent_id": "id_controle_pluie",
+         "type": "http",
+         "name_fr": "Cumul pluie jour",
+         "icon": "zrain.png",
+         "utilisation_id": "35",
+         "create" : "1",
+         "parameters":
+            {
+               "value_type": "float",
+               "value_unit": "mm",
+               "default_value" : "0"
+            }
+      }
+   ],    
+
+   "rules": 
+   [      
+      {        
+         "name_fr": "Maj Cumul Pluie",   
+         "criterias":                
+          [         
+             { "device_id": "plugin.parameters.id_cumul_zrain", "type": "c" }    
+          ],        
+         "actions":                            
+          [          
+             { "device_id": "plugin.devices.id_controle_pluie", "type" : "direct", "action": "MAJ" }   
+          ]      
+       }   
+   ]
+}
+
+
