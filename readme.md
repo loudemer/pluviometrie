@@ -1,4 +1,4 @@
-# Plugin Pluviometrie Z-Rain de Popp poue box Eedomus+
+# Plugin Pluviometrie Z-Rain de Popp pour box Eedomus+
 **Version 1.21**
 **Script cree par Germam**
 
