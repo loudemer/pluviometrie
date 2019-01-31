@@ -1,107 +1,205 @@
 {    
    "plugin_id": "pluviozrain",                     
    "name_fr": "Pluviometrie ZRain", 
-   "name_en": "",           
-   "icon": "zrainappli.png",                      
-   "version": "1.0",                             
+   "name_en": "ZRain Rain Gauge",           
+   "icon": "pluginzrain.png",                      
+   "version": "1.21",                             
    "creation_date": "2019-01-10",                
-   "modification_date": "2019-01-10",            
+   "modification_date": "2019-01-30",            
 
    "author": "Germam",                
    "description_fr": "Calcul des cumuls de pluie journaliers et mensuels pour capteur ZRain Popp",  
    "description_en": "Compute days and monthes rain falls volumes for ZRain Popp sensor device" ,
    "parameters": 
    [        
-     {                    
+    {
+        "parameter": "configuration",
+        "description": "--------- Configuration ----------",
+        "xtype": "textfield",
+        "field": "allowBlank: true, width: 0, style: 'visibility:hidden;'"
+    },
+    {                    
         "parameter": "id_cumul_zrain",                               
         "description": "Id du cumul annuel du périphérique ZRain",  
         "xtype": "combo",                           
         "field": "store : getCombo('/json/list_all.php'), displayField: 'label', valueField: 'id',forceSelection: true, triggerAction: 'all',selectOnFocus: true, editable: false, shadow : true, mode: 'local', width: 250, listWidth: 300, allowBlank: false"                      
-     }    
- ], 
+     },    
+     {
+        "parameter": "choix_canaux_vide",
+        "description": "",
+        "xtype": "textfield",
+        "field": "allowBlank: true, width: 0, style: 'visibility:hidden;'"
+    },
+{
+        "parameter": "choix_canaux",
+        "description": "--------- Choix des canaux ----------",
+        "xtype": "textfield",
+        "field": "allowBlank: true, width: 0, style: 'visibility:hidden;'"
+    },                               
+    {
+        "parameter": "box_id_controle_arrosage",
+        "description": "Conseil Arrosage et alerte pluie intense :",
+        "xtype": "checkbox",
+        "field": "style: 'margin-top: 6px;', checked: true"
+    }
+    ], 
 
    "scripts": 
-   [        
-     {            
+    [        
+        {            
         "name": "zrain.php"        
-     }    
-   ], 
+        }    
+    ], 
 
    "devices": 
    [       
-      {
-         "device_id": "id_controle_pluie",
-         "module_id": "41",
-         "type": "http",
-         "name_fr": "Controle MAJ",
-         "icon": "zrain.png",
-         "utilisation_id": "43",
-         "create" : "1",
-         "parameters":
-            {
-               "VAR1": "id_cumul_zrain",
-               "VAR2": "id_cumul_mois",
-               "VAR3": "id_cumul_jour",
-               "value_type": "float",
-               "ignore_errors": 3,
-               "RAW_URL": "http://localhost/script/?exec=&api_cumul_zrain=[VAR1]&id_cumul_mois=[VAR2]&id_cumul_jour=[VAR3]&action=updateconso",
-               "RAW_XPATH": "",
-               "POLLING": "0"
+        {
+            "device_id": "id_cumul_jour",
+            "module_id": "11",
+            "type": "http",
+            "name_fr": "Cumul pluie jour",
+            "icon": "pluviojour.png",
+            "utilisation_id": "7",
+            "create" : "1",
+            "value_unit": "mm/j",
+            "parameters":
+                {
+                "value_type": "float",
+                "default_value" : "0",
+                "RAW_URL": "",
+                "RAW_XPATH": ""
+                }
+        },
+        {
+            "device_id": "id_cumul_mois",
+            "module_id": "11",
+            "parent_id": "id_cumul_jour",
+            "type": "http",
+            "name_fr": "Cumul pluie mois",
+            "icon": "pluviomois.png",
+            "utilisation_id": "7",
+            "create" : "1",
+            "value_unit": "mm/mois",
+            "parameters":
+                {
+                "value_type": "float",
+                "default_value" : "0",
+                "RAW_URL": "",
+                "RAW_XPATH": ""
+                }
+        },
+        {
+            "device_id": "id_controle_arrosage",
+            "module_id": "11",
+            "parent_id": "id_cumul_jour",
+            "type": "http",
+            "name_fr": "Arrosage",
+            "icon": "arrosage.png",
+            "utilisation_id": "7",
+            "create" : "box_id_controle_arrosage",
+            "parameters":
+                {
+                "value_type": "list",
+                "RAW_URL": "",
+                "RAW_XPATH": ""
+                },
+            "values":
+                [
+                    { "value": "0", "icon": "arrosage.png", "description": "arrosage conseille"},
+                    { "value": "1", "icon": "arrosagedeconseille.png", "description": "arrosage inutile"}
+                ]        
+        },
+        {
+            "device_id": "id_pluie_intense",
+            "module_id": "11",
+            "parent_id": "id_cumul_jour",
+            "type": "http",
+            "name_fr": "Pluie Intense",
+            "icon": "zrain.png",
+            "utilisation_id": "7",
+            "create" : "box_id_controle_arrosage",
+            "parameters":
+                {
+                "value_type": "list",
+                "RAW_URL": "",
+                "RAW_XPATH": ""
+                },
+            "values":
+                [
+                    { "value": "0", "icon": "pasdepluie.png", "description": "pas de pluie intense"},
+                    { "value": "1", "icon": "pluieintense.png", "description": "pluie intense"}
+                ],        
+            "macros":
+                [
+                 { 
+                    "macro_id" : "id_set_alerte_5_mn",
+                    "name": "Extinction Alerte", 
+                    "dynamic_value": 10,
+                    "hidden" : 0,
+                    "actions": 
+                    [ 
+                        { "wait": 0, "wait_unit": "min", "action_type": "a", "value": 1 }, 
+                        { "wait": 5, "dynamic": false, "wait_unit": "min", "action_type": "a", "value": 0 } 
+                    ] 
+                    
+                }
+                ]       
             },
-         "values":
-         [
-            { "value": "0", "description": "MAJ", "icon": "pilotage_c1.png", "http_url": "http://localhost/script/?exec=&api_cumul_zrain=[VAR1]&id_cumul_mois=[VAR2]&id_cumul_jour=[VAR3]&action=updateconso" },
-            { "value": "1", "description": "RAZ", "icon": "pilotage_c2.png", "http_url": "http://localhost/script/?exec=&api_cumul_zrain=[VAR1]&id_cumul_mois=[VAR2]&id_cumul_jour=[VAR3]&action=raz" }
-         ]
-      },
-      {
-         "device_id": "id_cumul_mois",
-         "module_id": "11",
-         "parent_id": "id_controle_pluie",
-         "type": "http",
-         "name_fr": "Cumul pluie mois",
-         "icon": "zrain.png",
-         "utilisation_id": "35",
-         "create" : "1",
-         "parameters":
             {
-               "value_type": "float",
-               "value_unit": "mm",
-               "default_value" : "0"
+                "device_id": "id_controle_pluie",
+                "module_id": "41",
+                "type": "http",
+                "name_fr": "Controle Pluviometrie",
+                "icon": "pluvio.png",
+                "utilisation_id": "43",
+                "create" : "1",
+                "parameters":
+                    {
+                    "VAR1": "plugin.parameters.id_cumul_zrain",
+                    "VAR2": "plugin.devices.id_cumul_mois,plugin.devices.id_cumul_jour",
+                    "VAR3": "plugin.devices.id_controle_arrosage,plugin.devices.id_pluie_intense,plugin.macros.id_set_alerte_5_mn",
+                    "value_type": "list",
+                    "ignore_errors": 3,
+                    "RAW_URL": "http://localhost/script/?exec=zrain.php&id_cumul_zrain=[VAR1]&id_cumuls=[VAR2]&id_arrosage=[VAR3]&action=updateconso",
+                    "RAW_XPATH": "",
+                    "POLLING": "0"
+                    },
+                "values":
+                    [
+                        { "value": "maj", "description": "maj", "icon": "majpluvio.png", "http_url": "http://localhost/script/?exec=zrain.php&id_cumul_zrain=[VAR1]&id_cumuls=[VAR2]&id_arrosage=[VAR3]&action=updateconso" },
+                        { "value": "raz", "description": "raz", "icon": "razpluvio.png", "http_url": "http://localhost/script/?exec=zrain.php&id_cumul_zrain=[VAR1]&id_cumuls=[VAR2]&id_arrosage=[VAR3]&action=raz" },
+                        { "value": "test arrosage", "description": "test arrosage", "icon": "arrosage.png", "http_url": "http://localhost/script/?exec=zrain.php&id_cumul_zrain=[VAR1]&id_cumuls=[VAR2]&id_arrosage=[VAR3]&&action=arrosage" },
+                        { "value": "test pluie intense", "description": "test pluie intense", "icon": "pluieintense.png", "http_url": "http://localhost/script/?exec=zrain.php&id_cumul_zrain=[VAR1]&id_cumuls=[VAR2]&id_arrosage=[VAR3]&action=pluieintense" }
+                    ]
             }
-      },
-      {
-         "device_id": "id_controle_jour",
-         "module_id": "11",
-         "parent_id": "id_controle_pluie",
-         "type": "http",
-         "name_fr": "Cumul pluie jour",
-         "icon": "zrain.png",
-         "utilisation_id": "35",
-         "create" : "1",
-         "parameters":
-            {
-               "value_type": "float",
-               "value_unit": "mm",
-               "default_value" : "0"
-            }
-      }
-   ],    
+    ],    
 
    "rules": 
-   [      
-      {        
-         "name_fr": "Maj Cumul Pluie",   
-         "criterias":                
-          [         
-             { "device_id": "plugin.parameters.id_cumul_zrain", "type": "c" }    
-          ],        
-         "actions":                            
-          [          
-             { "device_id": "plugin.devices.id_controle_pluie", "type" : "direct", "action": "MAJ" }   
-          ]      
-       }   
-   ]
+    [      
+        {        
+            "name_fr": "Maj Cumul Pluie",   
+            "criterias":                
+            [         
+                { "device_id": "plugin.parameters.id_cumul_zrain", "type": "c" }    
+            ],        
+            "actions":                            
+            [          
+                { "device_id": "plugin.devices.id_controle_pluie", "type" : "direct", "action": "maj" }   
+            ]      
+        },   
+      
+        {        
+            "name_fr": "Maj journaliere",   
+            "cron":                
+            [         
+                { "day_of_week": "-1", "hour": "0", "minute": "1" }  
+            ],        
+            "actions":                            
+            [          
+                { "device_id": "plugin.devices.id_controle_pluie", "type" : "direct", "action": "maj" }   
+            ]      
+        }   
+    ]
 }
 
 
