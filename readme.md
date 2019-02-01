@@ -59,7 +59,7 @@ Lorsque l'alerte pluie intense est déclenchee, la pluviometrie est reevalue aut
 
 La consigne d'arrosage (conseille ou non) est reevaluee chaque jour a minuit. On peut lancer une mise a jour dans une regle en lancant l'action "test arrosage" du peripherique "controle pluviometrie"
 
-## Nouveautes de la version 1.1
+## Nouveautes de la version 1.21
 
 Ajout des fonctionnalites **Pluie intense** et **Conseil arrosage**
 Corrections de bugs d'installation
